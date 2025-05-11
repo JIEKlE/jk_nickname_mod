@@ -1,26 +1,23 @@
 package jiekie;
 
+import jiekie.network.NicknamePayload;
 import jiekie.render.NicknameScreen;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.util.InputUtil;
-import org.lwjgl.glfw.GLFW;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
+import net.minecraft.client.MinecraftClient;
 
 @Environment(EnvType.CLIENT)
 public class NicknameModClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
-        // nickname shortcut
-        KeyBinding openGuiKey = KeyBindingHelper.registerKeyBinding(
-                new KeyBinding("key.nickname.open", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_Y, "categories.nickname")
-        );
-        ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            while(openGuiKey.wasPressed())
-                client.setScreen(new NicknameScreen());
+        PayloadTypeRegistry.playS2C().register(NicknamePayload.ID, NicknamePayload.CODEC);
+        ClientPlayNetworking.registerGlobalReceiver(NicknamePayload.ID, (payload, context) -> {
+            context.client().execute(() -> {
+                MinecraftClient.getInstance().setScreen(new NicknameScreen());
+            });
         });
     }
 }

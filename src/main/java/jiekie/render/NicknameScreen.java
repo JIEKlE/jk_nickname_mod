@@ -1,19 +1,18 @@
 package jiekie.render;
 
 import jiekie.NicknameMod;
+import jiekie.widget.InvisibleButton;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
 public class NicknameScreen extends Screen {
     private TextFieldWidget nicknameField;
-    private ButtonWidget confirmButton;
-    private ButtonWidget closeButton;
+    private InvisibleButton confirmButton;
     private static final Identifier Background = Identifier.of(NicknameMod.MOD_ID, "textures/gui/nickname_ui.png");
 
     public NicknameScreen() {
@@ -29,44 +28,26 @@ public class NicknameScreen extends Screen {
         this.addDrawable(new Drawable() {
             @Override
             public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-                int boxWidth = 200;
-                int boxHeight = 100;
-                int left = centerX - (boxWidth / 2);
-                int top = centerY - (boxHeight / 2);
-                int right = centerX + (boxWidth / 2);
-                int bottom = centerY + (boxHeight / 2);
-                context.fill(left, top, right, bottom, 0xAA000000);
-            }
-        });
-
-        // label
-        this.addDrawable(new Drawable() {
-            @Override
-            public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-                context.drawCenteredTextWithShadow(textRenderer, Text.of("닉네임 입력"), centerX, centerY - 35, 0xFFFFFFFF);
+                context.drawTexture(Background, centerX - 135, centerY - 180, 0, 0, 270, 360, 270, 360);
             }
         });
 
         // text field
-        nicknameField = new TextFieldWidget(textRenderer, centerX - 70, centerY - 15, 140, 18, Text.of("닉네임"));
+        nicknameField = new TextFieldWidget(textRenderer, centerX - 45, centerY + 50, 90, 18, Text.of("닉네임"));
+        nicknameField.setDrawsBackground(false);
+        nicknameField.setEditableColor(0XFF8C7A78);
         this.addDrawableChild(nicknameField);
         this.setInitialFocus(nicknameField);
 
         // confirm button
-        confirmButton = ButtonWidget.builder(Text.of("확인"), button -> {
+        confirmButton = new InvisibleButton(centerX - 15, centerY + 75, 30, 30, () -> {
             String nickname = nicknameField.getText().trim();
             if(!nickname.isEmpty()) {
                 MinecraftClient.getInstance().player.networkHandler.sendChatCommand("닉네임 설정 " + nickname);
                 MinecraftClient.getInstance().setScreen(null);
             }
-        }).dimensions(centerX - 45, centerY + 15, 40, 18).build();
+        });
         this.addDrawableChild(confirmButton);
-
-        // close button
-        closeButton = ButtonWidget.builder(Text.of("닫기"), button -> {
-            MinecraftClient.getInstance().setScreen(null);
-        }).dimensions(centerX, centerY + 15, 40, 18).build();
-        this.addDrawableChild(closeButton);
     }
 
     @Override
